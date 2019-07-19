@@ -83,6 +83,17 @@ struct kvm_sregs {
 #define KVM_REG_RISCV_CSR_SIP		0x144
 #define KVM_REG_RISCV_CSR_SATP		0x180
 
+/* FP extensions are mapped as 4 */
+#define KVM_REG_RISCV_FP		(0x04 << KVM_REG_RISCV_TYPE_SHIFT)
+
+#define KVM_REG_RISCV_FP_F_0		0
+#define KVM_REG_RISCV_FP_F_31		31
+#define KVM_REG_RISCV_FP_F_FCSR		32
+
+#define KVM_REG_RISCV_FP_D_0		100
+#define KVM_REG_RISCV_FP_D_31		131
+#define KVM_REG_RISCV_FP_D_FCSR		132
+
 #endif
 
 #endif /* __LINUX_KVM_RISCV_H */
