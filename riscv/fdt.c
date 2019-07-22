@@ -29,8 +29,8 @@ static void dump_fdt(const char *dtb_file, void *fdt)
 #define CPU_ISA_MAX_LEN 128
 static void generate_cpu_nodes(void *fdt, struct kvm *kvm)
 {
-	int cpu, pos, i;
-	unsigned long isa;
+	int cpu, pos, i, index, valid_isa_len;
+	const char *valid_isa_order = "IEMAFDQCLBJTPVNSUHKORWXYZG";
 
 	_FDT(fdt_begin_node(fdt, "cpus"));
 	_FDT(fdt_property_cell(fdt, "#address-cells", 0x1));
@@ -47,9 +47,11 @@ static void generate_cpu_nodes(void *fdt, struct kvm *kvm)
 
 		snprintf(cpu_isa, CPU_ISA_MAX_LEN, "rv%ld", vcpu->riscv_xlen);
 		pos = strlen(cpu_isa);
-		for (i = 0, isa = vcpu->riscv_isa; isa; isa >>= 1, i++) {
-			if (isa & 0x1)
-				cpu_isa[pos++] = 'a' + i;
+		valid_isa_len = strlen(valid_isa_order);
+		for (i = 0; i < valid_isa_len; i++) {
+			index = valid_isa_order[i] - 'A';
+			if (vcpu->riscv_isa & (1 << (index)))
+				cpu_isa[pos++] = 'a' + index;
 		}
 		cpu_isa[pos] = '\0';
 
