@@ -234,6 +234,7 @@ int kvm_cpu__start(struct kvm_cpu *cpu)
 				 * Ensure that all VCPUs are torn down,
 				 * regardless of which CPU generated the event.
 				 */
+				kvm_cpu__show_registers(cpu);
 				kvm__reboot(cpu->kvm);
 				goto exit_kvm;
 			};

@@ -34,6 +34,8 @@ static __u64 __kvm_reg_id(__u64 type, __u64 idx)
 					     KVM_REG_RISCV_CORE_REG(name))
 
 #define RISCV_CSR_REG(num)	__kvm_reg_id(KVM_REG_RISCV_CSR, num)
+#define RISCV_FP_REG_F(name)	__kvm_reg_id(KVM_REG_RISCV_FP_F, KVM_REG_RISCV_FP_F_REG(name))
+#define RISCV_FP_REG_D(name)	__kvm_reg_id(KVM_REG_RISCV_FP_D, KVM_REG_RISCV_FP_D_REG(name))
 
 struct kvm_cpu *kvm_cpu__arch_init(struct kvm *kvm, unsigned long cpu_id)
 {
@@ -347,4 +349,49 @@ void kvm_cpu__show_registers(struct kvm_cpu *vcpu)
 	if (ioctl(vcpu->vcpu_fd, KVM_GET_ONE_REG, &reg) < 0)
 		die("KVM_GET_ONE_REG failed (t6)");
 	dprintf(debug_fd, " T6:    0x%lx\n", data);
+
+	if (ioctl(vcpu->vcpu_fd, KVM_SET_ONE_REG, &reg) < 0)
+		die("KVM_SET_ONE_REG failed (config.isa)");
+	data = 0x123;	
+	reg.id		= RISCV_FP_REG_F(fcsr);
+	if (ioctl(vcpu->vcpu_fd, KVM_SET_ONE_REG, &reg) < 0)
+		die("KVM_SET_ONE_REG failed (fcsr)");
+	reg.id		= RISCV_FP_REG_F(fcsr);
+	if (ioctl(vcpu->vcpu_fd, KVM_GET_ONE_REG, &reg) < 0)
+		die("KVM_GET_ONE_REG failed (f)");
+	dprintf(debug_fd, " fcsr:    0x%lx\n", data);
+	int i = 0;
+	for (;i<31;i++) {
+		data = 0x210 + i;	
+		reg.id		= RISCV_FP_REG_F(f[i]);
+		if (ioctl(vcpu->vcpu_fd, KVM_SET_ONE_REG, &reg) < 0)
+		die("KVM_SET_ONE_REG failed (fcsr)");
+	}
+	for (i=0;i<31;i++) {
+		reg.id		= RISCV_FP_REG_F(f[i]);
+		if (ioctl(vcpu->vcpu_fd, KVM_GET_ONE_REG, &reg) < 0)
+		die("KVM_GET_ONE_REG failed (f)");
+		dprintf(debug_fd, " f index:  %d  0x%lx\n", i, data);
+	}
+	data = 0x234;	
+	reg.id		= RISCV_FP_REG_D(fcsr);
+	if (ioctl(vcpu->vcpu_fd, KVM_SET_ONE_REG, &reg) < 0)
+		die("KVM_SET_ONE_REG failed (fcsr)");
+	reg.id		= RISCV_FP_REG_D(fcsr);
+	if (ioctl(vcpu->vcpu_fd, KVM_GET_ONE_REG, &reg) < 0)
+		die("KVM_GET_ONE_REG failed (f)");
+	dprintf(debug_fd, " D fcsr:    0x%lx\n", data);
+	i = 0;
+	for (;i<31;i++) {
+		data = 0x310 + i;	
+		reg.id		= RISCV_FP_REG_D(f[i]);
+		if (ioctl(vcpu->vcpu_fd, KVM_SET_ONE_REG, &reg) < 0)
+		die("KVM_SET_ONE_REG failed (fcsr)");
+	}
+	for (i=0;i<31;i++) {
+		reg.id		= RISCV_FP_REG_D(f[i]);
+		if (ioctl(vcpu->vcpu_fd, KVM_GET_ONE_REG, &reg) < 0)
+		die("KVM_GET_ONE_REG failed (D)");
+		dprintf(debug_fd, " D index:  %d  0x%lx\n", i, data);
+	}		
 }
