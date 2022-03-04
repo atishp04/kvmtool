@@ -1,0 +1,21 @@
+This series adds Sstc extension which was ratified recently.
+
+The first two patches adds the ISA extension framework which allows
+to define and update the DT for any multi-letter ISA extensions. 
+
+The last patch just enables Sstc extension specifically if the hardware
+supports it.
+
+The series can also be found at
+https://github.com/atishp04/kvmtool/tree/sstc_v1
+
+The kvm & Qemu patches can be found at
+
+KVM: https://github.com/atishp04/linux/tree/sstc_v2
+OpenSBI: https://github.com/atishp04/opensbi/tree/sstc_v1
+Qemu: https://github.com/atishp04/qemu/tree/sstc_v1 
+
+[1] https://drive.google.com/file/d/1m84Re2yK8m_vbW7TspvevCDR82MOBaSX/view
+
+option-subject Add Sstc extension support
+option-prefix RFC PATCH kvmtool
