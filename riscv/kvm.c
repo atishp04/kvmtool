@@ -13,9 +13,33 @@ struct kvm_ext kvm_req_ext[] = {
 	{ 0, 0 },
 };
 
+void kvm_tee_measure_region(struct kvm *kvm, unsigned long uaddr,
+			      unsigned long gpa, unsigned long rsize)
+{
+	int ret;
+
+	struct kvm_riscv_tee_measure_region mr = {
+		.user_addr = uaddr,
+		.gpa = gpa,
+		.size = rsize,
+	};
+
+	ret = ioctl(kvm->vm_fd, KVM_RISCV_TEE_MEASURE_REGION, &mr);
+	if (ret < 0) {
+		ret = -errno;
+		die("Setting measure region failed for TEE VM\n.");
+	}
+}
+
 u64 kvm__arch_default_ram_address(void)
 {
 	return RISCV_RAM;
+}
+
+int kvm__get_vm_type(struct kvm *kvm)
+{
+	printf("%s: In returning KVM_VM_TYPE_RISCV_TEE %ld\n", __func__, KVM_VM_TYPE_RISCV_TEE);
+	return KVM_VM_TYPE_RISCV_TEE;
 }
 
 void kvm__arch_validate_cfg(struct kvm *kvm)
@@ -89,8 +113,8 @@ void kvm__arch_init(struct kvm *kvm)
 		MADV_HUGEPAGE);
 }
 
-#define FDT_ALIGN	SZ_4M
-#define INITRD_ALIGN	8
+#define FDT_ALIGN	SZ_64M
+#define INITRD_ALIGN	SZ_4K
 bool kvm__arch_load_kernel_image(struct kvm *kvm, int fd_kernel, int fd_initrd,
 				 const char *kernel_cmdline)
 {
@@ -114,6 +138,8 @@ bool kvm__arch_load_kernel_image(struct kvm *kvm, int fd_kernel, int fd_initrd,
 
 	pos = kvm->ram_start + kernel_offset;
 	kvm->arch.kern_guest_start = host_to_guest_flat(kvm, pos);
+	printf("%s: ram_start (hva) %lx pos %lx gpa %lx\n", __func__, (unsigned long)kvm->ram_start,
+		(unsigned long)pos, (unsigned long)kvm->arch.kern_guest_start);
 	file_size = read_file(fd_kernel, pos, limit - pos);
 	if (file_size < 0) {
 		if (errno == ENOMEM)
@@ -125,6 +151,8 @@ bool kvm__arch_load_kernel_image(struct kvm *kvm, int fd_kernel, int fd_initrd,
 	pr_debug("Loaded kernel to 0x%llx (%zd bytes)",
 		 kvm->arch.kern_guest_start, file_size);
 
+	kvm_tee_measure_region(kvm, (unsigned long)pos, kvm->arch.kern_guest_start,
+			       file_size);
 	/* Place FDT just after kernel at FDT_ALIGN address */
 	pos = kernel_end + FDT_ALIGN;
 	guest_addr = ALIGN(host_to_guest_flat(kvm, pos), FDT_ALIGN);
@@ -165,6 +193,8 @@ bool kvm__arch_load_kernel_image(struct kvm *kvm, int fd_kernel, int fd_initrd,
 		pr_debug("Loaded initrd to 0x%llx (%llu bytes)",
 			 kvm->arch.initrd_guest_start,
 			 kvm->arch.initrd_size);
+		kvm_tee_measure_region(kvm, (unsigned long)pos, initrd_start,
+				       file_size);
 	} else {
 		kvm->arch.initrd_size = 0;
 	}

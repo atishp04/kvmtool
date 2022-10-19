@@ -87,4 +87,6 @@ void plic__irq_trig(struct kvm *kvm, int irq, int level, bool edge);
 
 void pci__generate_fdt_nodes(void *fdt);
 
+void kvm_tee_measure_region(struct kvm *kvm, unsigned long uaddr,
+			      unsigned long gpa, unsigned long rsize);
 #endif /* KVM__KVM_ARCH_H */

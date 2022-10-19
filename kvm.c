@@ -466,6 +466,7 @@ int kvm__init(struct kvm *kvm)
 		goto err_sys_fd;
 	}
 
+	printf("%s: Creating the VM now\n", __func__);
 	kvm->vm_fd = ioctl(kvm->sys_fd, KVM_CREATE_VM, kvm__get_vm_type(kvm));
 	if (kvm->vm_fd < 0) {
 		pr_err("KVM_CREATE_VM ioctl");
