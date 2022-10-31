@@ -479,9 +479,9 @@ static void plic__generate_fdt_node(void *fdt,
 							      u8 irq,
 							      enum irq_type))
 {
+#if 0
 	u32 i;
 	u32 reg_cells[4], *irq_cells;
-
 	reg_cells[0] = 0;
 	reg_cells[1] = cpu_to_fdt32(RISCV_PLIC);
 	reg_cells[2] = 0;
@@ -508,8 +508,8 @@ static void plic__generate_fdt_node(void *fdt,
 	_FDT(fdt_property(fdt, "interrupts-extended", irq_cells,
 			  sizeof(u32) * plic.num_context * 2));
 	_FDT(fdt_end_node(fdt));
-
 	free(irq_cells);
+#endif
 }
 
 static int plic__init(struct kvm *kvm)

@@ -11,6 +11,7 @@
 
 #define RISCV_ISA_EXT_REG(id)	__kvm_reg_id(KVM_REG_RISCV_ISA_EXT, \
 					     id, KVM_REG_SIZE_ULONG)
+
 struct isa_ext_info {
 	const char *name;
 	unsigned long ext_id;
@@ -116,7 +117,7 @@ static void generate_cpu_nodes(void *fdt, struct kvm *kvm)
 
 static int setup_fdt(struct kvm *kvm)
 {
-	struct device_header *dev_hdr;
+	//struct device_header *dev_hdr;
 	u8 staging_fdt[FDT_MAX_SIZE];
 	u64 mem_reg_prop[]	= {
 		cpu_to_fdt64(kvm->arch.memory_guest_start),
@@ -126,8 +127,8 @@ static int setup_fdt(struct kvm *kvm)
 	void *fdt		= staging_fdt;
 	void *fdt_dest		= guest_flat_to_host(kvm,
 						     kvm->arch.dtb_guest_start);
-	void (*generate_mmio_fdt_nodes)(void *, struct device_header *,
-					void (*)(void *, u8, enum irq_type));
+	//void (*generate_mmio_fdt_nodes)(void *, struct device_header *,
+	//				void (*)(void *, u8, enum irq_type));
 
 	/* Create new tree without a reserve map */
 	_FDT(fdt_create(fdt, FDT_MAX_SIZE));
@@ -183,7 +184,7 @@ static int setup_fdt(struct kvm *kvm)
 	_FDT(fdt_property_cell(fdt, "#size-cells", 0x2));
 	_FDT(fdt_property_cell(fdt, "interrupt-parent", PHANDLE_PLIC));
 	_FDT(fdt_property(fdt, "ranges", NULL, 0));
-
+#if 0
 	/* Virtio MMIO devices */
 	dev_hdr = device__first_dev(DEVICE_BUS_MMIO);
 	while (dev_hdr) {
@@ -201,8 +202,8 @@ static int setup_fdt(struct kvm *kvm)
 	}
 
 	/* PCI host controller */
-	pci__generate_fdt_nodes(fdt);
-
+	//pci__generate_fdt_nodes(fdt);
+#endif
 	_FDT(fdt_end_node(fdt));
 
 	if (fdt_stdout_path) {
