@@ -465,10 +465,10 @@ static void plic__mmio_callback(struct kvm_cpu *vcpu,
 
 static void plic__generate_fdt_node(void *fdt, struct kvm *kvm)
 {
+#if 0
 	u32 i;
 	char name[64];
 	u32 reg_cells[4], *irq_cells;
-
 	reg_cells[0] = 0;
 	reg_cells[1] = cpu_to_fdt32(RISCV_IRQCHIP);
 	reg_cells[2] = 0;
@@ -496,8 +496,8 @@ static void plic__generate_fdt_node(void *fdt, struct kvm *kvm)
 	_FDT(fdt_property(fdt, "interrupts-extended", irq_cells,
 			  sizeof(u32) * plic.num_context * 2));
 	_FDT(fdt_end_node(fdt));
-
 	free(irq_cells);
+#endif
 }
 
 static int plic__init(struct kvm *kvm)
